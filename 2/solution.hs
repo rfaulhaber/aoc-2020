@@ -2,6 +2,7 @@
 import System.IO
 import Data.String
 import Text.Printf
+import Debug.Trace
 
 data Range = Range {
   low :: Integer,
@@ -42,16 +43,23 @@ parseLine input = do
 isLineValid :: Line -> Bool
 isLineValid Line {range, letter, password} = inRange range (charCount letter password)
 
-countValidLines :: [Line] -> Integer
-countValidLines (h:t) = if isLineValid h then 1 + countValidLines t else countValidLines t
-countValidLines [] = 0
+isLineValid2 :: Line -> Bool
+isLineValid2 Line {range, letter, password} = (||) (password!!(lowIndex) == letter && password!!(highIndex) /= letter) (password!!(lowIndex) /= letter && password!!(highIndex) == letter)
+  where lowIndex = (fromIntegral . subtract 1 . low) range
+        highIndex = (fromIntegral . subtract 1 . high) range
+
+countValidLines :: (Line -> Bool) -> [Line] -> Integer
+countValidLines validator (h:t) = if validator h then 1 + countValidLines validator t else countValidLines validator t
+countValidLines validator [] = 0
 
 solve = do
     handle <- openFile "./input.txt" ReadMode  
     contents <- hGetContents handle  
-    -- print (split "\n" contents)
-    let part1 = ((countValidLines . (map parseLine) . init . (split "\n")) $ contents)
-    printf "Part 1: %d" part1
+    let lines = ((map parseLine) . init . (split "\n")) $ contents
+    let part1 = countValidLines isLineValid lines
+    let part2 = countValidLines isLineValid2 lines
+    printf "Part 1: %d\n" part1
+    printf "Part 2: %d\n" part2
     hClose handle
 
 main = solve
