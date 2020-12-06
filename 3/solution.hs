@@ -3,31 +3,19 @@ import           Data.List
 import           Text.Printf
 import           Debug.Trace
 
-slopeSize :: String -> Int
-slopeSize = length . head . lines
+coordinates :: Int -> Int -> (Int, Int) -> [(Int, Int)]
+coordinates r d start = iterate (\(x, y) -> (x + d, y + r)) start
 
-isTree :: Char -> Bool
-isTree c = c == '#'
+slope :: String -> Int -> Char
+slope input y = input !! (y `mod` (length input))
 
-tt :: (a, a) -> a
-tt (_, t) = t
-
-countTrees :: String -> Int -> Int -> Int
-countTrees input size offset | offset `mod` size == 0 =
-  if isTree (input !! offset) then 1 else 0
-countTrees input size offset = if isTree (input !! 3)
-  then 1 + (countTrees nextInput size nextOffset)
-  else (countTrees nextInput size nextOffset)
- where
-  nextInput = (tt . (splitAt (offset + 1))) input
-  nextOffset =
-    trace ("nextOffset " ++ show (offset + size + 3)) (offset + size + 3)
+trees :: [String] -> Int -> Int -> (Int, Int) -> Int
+trees input r d start =
+  length . filter (== '#') . map (\(x, y) -> slope (input !! x) y ) $
+    tail (take inputMax (coordinates r d start))
+  where inputMax = length input
 
 main = do
-  handle   <- openFile "./input.txt" ReadMode
-  contents <- hGetContents handle
-  let size  = slopeSize contents
-  let geo = tt . splitAt size . filter (\c -> c /= '\n') $ contents
-  let part1 = countTrees geo size 3
-  printf "Part 1: %d" part1
-  hClose handle
+  input <- (fmap lines . readFile) "./input.txt"
+  let part1 = trees input 3 1 (0, 0)
+  printf "Part 1: %s" (show part1)
