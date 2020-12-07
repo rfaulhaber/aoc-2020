@@ -1,3 +1,9 @@
 #+TITLE: Advent of Code 2020
 
-My solutions for Advent of Code 2020 in various languages.
+My solutions for Advent of Code 2020 in various languages, aka "My Tour of
+Functional Programming Languages."
+
+If you're an Emacs and Nix user (such as myself), you can turn each solution
+buffer into an ad-hoc language IDE using the =dir-locals.nix= file. Or you can
+just as easily run any of my solutions using the relevant nix-shell file under
+=shells/=.
