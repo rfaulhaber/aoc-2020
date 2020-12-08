@@ -61,18 +61,14 @@ defmodule Solution do
   end
 
   def solve_part_2(input) do
-    index =
-      input
-      |> Enum.sort()
-      |> Enum.chunk_every(2, 1, :discard)
-      |> Enum.map(fn [x, y] -> abs(x - y) end)
-      |> Enum.find_index(fn x -> x > 1 end)
+    range = Enum.min(input)..Enum.max(input)
+    Enum.find(range, fn x -> !Enum.member?(input, x) end)
   end
 end
 
 input = Solution.parse_input()
 part1 = Solution.solve(input)
-# part2 = Solution.solve_part_2(input)
+part2 = Solution.solve_part_2(input)
 
 IO.puts("Part 1: #{part1}")
-# IO.puts("Part 1: #{inspect(part2)}")
+IO.puts("Part 1: #{inspect(part2)}")
