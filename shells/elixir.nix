@@ -2,4 +2,4 @@
 
 with pkgs;
 
-mkShell { buildInputs = [ elixir_1_10 ]; }
+mkShell { buildInputs = [ elixir ]; }
