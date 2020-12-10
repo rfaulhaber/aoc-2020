@@ -1,8 +1,41 @@
 #lang racket
 
-(require racket/string)
+(require srfi/13) 
 
 (struct passport (byr iyr eyr hgt hcl ecl pid cid))
+
+(define (between test mn mx)
+  (and (>= test mn) (<= test mx)))
+
+(define (valid-byr byr)
+  (between byr 1920 2002))
+
+(define (valid-iyr iyr)
+  (between iyr 2010 2020))
+
+(define (valid-eyr eyr)
+  (between eyr 2020 2030))
+
+(define (valid-hgt hgt)
+  (let* ([idx (or (string-contains hgt "in") (string-contains hgt "cm"))]
+        [val  (if idx (string->number (substring hgt 0 idx)) null)]
+        [ty (if idx (substring hgt idx) null)])
+    (if (not idx)
+        #f
+        (cond
+          [(string=? ty "cm") (between val 150 193)]
+          [(string=? ty "in") (between val 59 76)]
+          )
+        )))
+
+(define (valid-hcl hcl)
+  (regexp-match-exact? #px"#([a-z0-9]{6})" hcl))
+
+(define (valid-ecl ecl)
+  (member ecl (list "amb" "blu" "brn" "gry" "grn" "hzl" "oth")))
+
+(define (valid-pid pid)
+  (regexp-match-exact? #px"([0-9]{9})" pid))
 
 (define (hash->passport h)
   (passport
@@ -36,6 +69,16 @@
    (not (null? (passport-ecl p)))
    (not (null? (passport-pid p)))))
 
+(define (passport-valid2? p)
+  (and
+   (and (not (null? (passport-byr p))) (valid-byr (string->number (passport-byr p))))
+   (and (not (null? (passport-iyr p))) (valid-iyr (string->number (passport-iyr p))))
+   (and (not (null? (passport-eyr p))) (valid-eyr (string->number (passport-eyr p))))
+   (and (not (null? (passport-hgt p))) (valid-hgt (passport-hgt p)))
+   (and (not (null? (passport-hcl p))) (valid-hcl (passport-hcl p)))
+   (and (not (null? (passport-ecl p))) (valid-ecl (passport-ecl p)))
+   (and (not (null? (passport-pid p))) (valid-pid (passport-pid p)))))
+
 (define (parse-input input)
   (let* ([passport-lines (string-split input "\n\n")]
          [passport-lists (map
@@ -47,4 +90,5 @@
 (define input (file->string "./input.txt"))
 (define passports (map string->passport (parse-input input)))
 
-(print (format "Part 1: ~a" (length (filter-map passport-valid? passports))))
+(println (format "Part 1: ~a" (length (filter-map passport-valid? passports))))
+(println (format "Part 2: ~a" (length (filter-map passport-valid2? passports))))
