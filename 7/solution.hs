@@ -1,21 +1,34 @@
 import           System.IO
-import           Text.Parsec
-import           Text.Parsec.String
+import qualified Data.Map.Strict               as Map
 
 type Color = String
 type Bag = (Color, Int)
 type Rule = (Color, [Bag])
 
-parseRules :: String -> [Rule]
-parseRules = undefined
+-- parsing inspiration came from:
+-- https://www.michaelcw.com/programming/2020/12/11/aoc-2020-d7.html
+-- thank you!
 
-word :: Parser String
-word = do
-  w <- many1 letter
-  optional spaces
-  optional endOfLine
-  return w
+parseLine :: String -> Rule
+parseLine l =
+  let w     = words l
+      color = unwords (take 2 w)
+      bags  = parseBag (drop 4 w)
+  in  if length w == 7 then (color, []) else (color, bags)
+
+parseBag :: [String] -> [Bag]
+parseBag [] = []
+parseBag w =
+  let c     = read (head w)
+      color = (unwords . take 2 . tail) $ w
+  in  (color, c) : parseBag (drop 4 w)
+
+tupleHead :: (a, b) -> a
+tupleHead (a, _) = a
+
+-- I don't know how to solve this in Haskell yet!
+
 
 main = do
-  input <- readFile "./input.txt"
-  print (parse (many word) "" "foo bar baz\nquux")
+  input <- readFile "./practice.txt"
+  print ((map parseLine . lines) $ input)
