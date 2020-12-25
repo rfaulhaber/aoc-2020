@@ -1,0 +1,1 @@
+../dir-locals/clojure.nix
